@@ -15,18 +15,25 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const u = JSON.parse(userStr);
-        setUser(u);
-        setSession({ access_token: u.token });
-        setRole(u.role);
-      } catch (e) {
-        console.error("Invalid user JSON in localStorage");
+    const handleStorageChange = () => {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const u = JSON.parse(userStr);
+          setUser(u);
+          setSession({ access_token: u.token });
+          setRole(u.role);
+        } catch (e) {
+          console.error("Invalid user JSON in localStorage");
+        }
       }
-    }
+    };
+
+    handleStorageChange();
     setLoading(false);
+
+    window.addEventListener("user-updated", handleStorageChange);
+    return () => window.removeEventListener("user-updated", handleStorageChange);
   }, []);
 
   // Call after successful login to update context without page reload

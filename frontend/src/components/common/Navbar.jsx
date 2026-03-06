@@ -17,10 +17,10 @@ function Navbar() {
 
     const navLinks = [
         { label: 'Home', href: '#home' },
-        { label: 'About', href: '#about' },
+        // { label: 'About', href: '#about' },
         { label: 'Departments', href: '#departments' },
         { label: 'Impact', href: '#impact' },
-        { label: 'Contact', href: '#contact' },
+        // { label: 'Contact', href: '#contact' },
     ];
 
     const handleNavClick = (e, href) => {
@@ -61,14 +61,17 @@ function Navbar() {
                     </motion.button>
                 </div>
 
-                {/* Mobile Menu Button */}
-                <button
-                    className="navbar-toggle"
-                    onClick={() => setIsOpen(!isOpen)}
-                    aria-label="Toggle menu"
-                >
-                    <span className={`hamburger ${isOpen ? 'hamburger-open' : ''}`}></span>
-                </button>
+                {/* Mobile Login Button */}
+                <div className="navbar-toggle" style={{ background: 'transparent', padding: 0 }}>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn btn-primary btn-small"
+                        onClick={() => navigate('/login')}
+                    >
+                        Login
+                    </motion.button>
+                </div>
             </div>
 
             {/* Mobile Nav */}

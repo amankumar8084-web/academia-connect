@@ -130,6 +130,15 @@ export default function MyProfile() {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setProfile(prev => ({ ...prev, profilePicture: data.profilePicture }));
+
+            // Update authUser context so layout header updates too
+            const existingUser = JSON.parse(localStorage.getItem("user") || "{}");
+            const updatedUser = { ...existingUser, profilePicture: data.profilePicture };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+
+            // Dispatch a custom event to notify useAuth to re-read localStorage
+            window.dispatchEvent(new Event("user-updated"));
+
             toast.success('Profile picture updated!');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to upload image');
@@ -174,8 +183,15 @@ export default function MyProfile() {
                         </div>
                         {/* Info */}
                         <div className="text-center sm:text-left">
-                            <h2 className="text-xl sm:text-2xl font-bold text-primary">{displayName}</h2>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-sm text-muted-foreground">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                <h2 className="text-xl sm:text-2xl font-bold text-primary">{displayName}</h2>
+                                {profile?.domain && (
+                                    <span className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                                        Assigned Domain(s): {profile.domain}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1.5 justify-center sm:justify-start"><Mail className="h-3.5 w-3.5 text-primary/60" />{profile?.email}</span>
                                 {profile?.phone && <span className="flex items-center gap-1.5 justify-center sm:justify-start"><Phone className="h-3.5 w-3.5 text-primary/60" />{profile.phone}</span>}
                             </div>

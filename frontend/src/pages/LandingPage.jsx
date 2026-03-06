@@ -30,24 +30,24 @@ function LandingPage() {
 
     // 18 Departments data (clickable)
     const departments = [
-        { code: 'CSE', name: 'Computer Science and Engineering' },
-        { code: 'IT', name: 'Information Technology' },
-        { code: 'ECE', name: 'Electronics & Communication Engineering' },
-        { code: 'MECH', name: 'Mechanical Engineering' },
-        { code: 'AI&DS', name: 'Artificial Intelligence & Data Science' },
-        { code: 'CIVIL', name: 'Civil Engineering' },
         { code: 'AERO', name: 'Aero Engineering' },
         { code: 'AGRI', name: 'Agricultural Engineering' },
+        { code: 'AI&DS', name: 'Artificial Intelligence & Data Science' },
         { code: 'AI&ML', name: 'Artificial Intelligence & Machine Learning' },
         { code: 'BME', name: 'Bio Medical Engineering' },
+        { code: 'CIVIL', name: 'Civil Engineering' },
+        { code: 'CSE', name: 'Computer Science and Engineering' },
         { code: 'CSBS', name: 'Computer Science & Business System' },
+        { code: 'ECE', name: 'Electronics & Communication Engineering' },
         { code: 'EEE', name: 'Electrical and Electronics Engineering' },
         { code: 'FOOD TECH', name: 'Food Technology' },
-        { code: 'M.Tech CSE', name: 'M.Tech CSE' },
+        { code: 'IT', name: 'Information Technology' },
         { code: 'MBA', name: 'Master in Business Administration' },
         { code: 'MCA', name: 'Master in Computer Application' },
-        { code: 'SFE', name: 'Safety and Fire Engineering' },
-        { code: 'PCT', name: 'PetroChemical Technology' }
+        { code: 'MECH', name: 'Mechanical Engineering' },
+        { code: 'M.Tech CSE', name: 'M.Tech CSE' },
+        { code: 'PCT', name: 'PetroChemical Technology' },
+        { code: 'SFE', name: 'Safety and Fire Engineering' }
     ];
 
 

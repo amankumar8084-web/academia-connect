@@ -40,10 +40,11 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/dashboard/admin/faculty" element={<ProtectedRoute allowedRoles={["super-admin"]}><FacultyList /></ProtectedRoute>} />
           <Route path="/dashboard/admin/users" element={<ProtectedRoute allowedRoles={["super-admin"]}><StudentList /></ProtectedRoute>} />
           <Route path="/dashboard/admin/departments" element={<ProtectedRoute allowedRoles={["super-admin"]}><DepartmentList /></ProtectedRoute>} />
-          <Route path="/dashboard/admin/user/:id" element={<ProtectedRoute allowedRoles={["super-admin"]}><UserProfile /></ProtectedRoute>} />
+          <Route path="/dashboard/admin/user/:id" element={<ProtectedRoute allowedRoles={["super-admin", "admin"]}><UserProfile /></ProtectedRoute>} />
           <Route path="/dashboard/admin/settings" element={<ProtectedRoute allowedRoles={["super-admin"]}><AdminSettings /></ProtectedRoute>} />
           <Route path="/dashboard/faculty" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/faculty/students" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyStudents /></ProtectedRoute>} />
+          <Route path="/dashboard/faculty/faculties" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyList /></ProtectedRoute>} />
           <Route path="/dashboard/student" element={<ProtectedRoute allowedRoles={["student"]}><StudentDashboard /></ProtectedRoute>} />
           <Route path="/dashboard/industry" element={<ProtectedRoute allowedRoles={["industry_partner"]}><IndustryDashboard /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />

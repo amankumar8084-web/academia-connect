@@ -43,10 +43,14 @@ export function DashboardLayout({
                 <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">{role?.replace("_", " ") || "Loading..."}</p>
               )}
             </div>
-            <div className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground border border-border/50 hover:ring-2 hover:ring-primary/30 transition-all">
-              <span className="font-bold text-xs sm:text-sm">
-                {initials}
-              </span>
+            <div className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground border border-border/50 hover:ring-2 hover:ring-primary/30 transition-all overflow-hidden">
+              {user?.profilePicture ? (
+                <img src={user.profilePicture} alt={user.name} className="h-full w-full object-cover" />
+              ) : (
+                <span className="font-bold text-xs sm:text-sm">
+                  {initials}
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -168,8 +168,8 @@ router.get('/stats', protect, authorize('super-admin'), async (req, res) => {
 
 // @route   GET /api/users/role/:role
 // @desc    Get users by role
-// @access  Private / Super-Admin
-router.get('/role/:role', protect, authorize('super-admin'), async (req, res) => {
+// @access  Private / Super-Admin & Admin
+router.get('/role/:role', protect, authorize('super-admin', 'admin'), async (req, res) => {
     try {
         const users = await User.find({ role: req.params.role }).select('-password');
         res.json(users);
@@ -198,8 +198,8 @@ router.get('/:id', protect, async (req, res) => {
 
 // @route   GET /api/users/:id/students
 // @desc    Get students managed by a faculty member (same dept & domain)
-// @access  Private / Super-Admin
-router.get('/:id/students', protect, authorize('super-admin'), async (req, res) => {
+// @access  Private / Super-Admin & Admin
+router.get('/:id/students', protect, authorize('super-admin', 'admin'), async (req, res) => {
     try {
         const faculty = await User.findById(req.params.id).select('-password');
         if (!faculty || faculty.role !== 'admin') {
@@ -207,9 +207,17 @@ router.get('/:id/students', protect, authorize('super-admin'), async (req, res) 
         }
 
         const query = { role: 'student' };
-        // Match students by domain if faculty has one, else by department
+        // Match students by domain if faculty has one
         if (faculty.domain) {
-            query.domain = faculty.domain;
+            const domains = faculty.domain.split(',').map(d => d.trim()).filter(Boolean);
+            if (domains.length > 0) {
+                // Escape special Regex characters for each domain and join with OR pattern
+                const escapedDomains = domains.map(d => d.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'));
+                query.domain = { $regex: escapedDomains.join('|'), $options: 'i' };
+            } else {
+                // Fallback to strict match if parsing fails
+                query.domain = faculty.domain;
+            }
         } else if (faculty.department) {
             query.department = faculty.department;
         }

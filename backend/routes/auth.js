@@ -31,6 +31,7 @@ router.post('/login', async (req, res) => {
                 role: user.role,
                 name: user.name,
                 department: user.department,
+                profilePicture: user.profilePicture,
                 token: generateToken(user._id, user.role),
             });
         } else {

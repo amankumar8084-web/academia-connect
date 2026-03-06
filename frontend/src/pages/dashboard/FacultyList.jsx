@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ import {
 
 export default function FacultyList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "super-admin";
   const [faculty, setFaculty] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -193,9 +196,11 @@ export default function FacultyList() {
           <h2 className="text-xl sm:text-2xl font-bold text-foreground">Faculty Management</h2>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
-          <Button onClick={() => setIsAddOpen(true)} className="bg-[#1e3c72] hover:bg-[#2a5298] text-white text-xs sm:text-sm">
-            <UserPlus className="h-4 w-4 mr-1.5 sm:mr-2" /> Add New Faculty
-          </Button>
+          {isSuperAdmin && (
+            <Button onClick={() => setIsAddOpen(true)} className="bg-[#1e3c72] hover:bg-[#2a5298] text-white text-xs sm:text-sm">
+              <UserPlus className="h-4 w-4 mr-1.5 sm:mr-2" /> Add New Faculty
+            </Button>
+          )}
           <Button variant="outline" onClick={() => { setLoading(true); fetchFaculty(); }} className="text-xs sm:text-sm">
             <RefreshCw className="h-4 w-4 mr-1.5 sm:mr-2" /> Refresh
           </Button>
@@ -273,20 +278,22 @@ export default function FacultyList() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2 border-t border-border/30">
-                    <Button variant="outline" size="sm" className="flex-1 min-h-[40px] text-xs"
-                      onClick={() => navigate(`/dashboard/admin/user/${f._id}`)}>
-                      <Eye className="h-3.5 w-3.5 mr-1.5" /> View
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1 min-h-[40px] text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
-                      onClick={() => openReplace(f)}>
-                      <ArrowLeftRight className="h-3.5 w-3.5 mr-1.5" /> Replace
-                    </Button>
-                    <Button variant="outline" size="sm" className="min-h-[40px] text-xs text-destructive border-destructive/30 hover:bg-destructive/10 px-3"
-                      onClick={() => handleDelete(f._id, f.name)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+                  {isSuperAdmin && (
+                    <div className="flex gap-2 pt-2 border-t border-border/30">
+                      <Button variant="outline" size="sm" className="flex-1 min-h-[40px] text-xs"
+                        onClick={() => navigate(`/dashboard/admin/user/${f._id}`)}>
+                        <Eye className="h-3.5 w-3.5 mr-1.5" /> View
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1 min-h-[40px] text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
+                        onClick={() => openReplace(f)}>
+                        <ArrowLeftRight className="h-3.5 w-3.5 mr-1.5" /> Replace
+                      </Button>
+                      <Button variant="outline" size="sm" className="min-h-[40px] text-xs text-destructive border-destructive/30 hover:bg-destructive/10 px-3"
+                        onClick={() => handleDelete(f._id, f.name)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -301,7 +308,7 @@ export default function FacultyList() {
                   <TableHead>Phone Number</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Domain / Expertise</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -337,22 +344,24 @@ export default function FacultyList() {
                           <span className="text-muted-foreground text-xs">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
-                            onClick={() => navigate(`/dashboard/admin/user/${f._id}`)} title="View">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50"
-                            onClick={() => openReplace(f)} title="Replace">
-                            <ArrowLeftRight className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDelete(f._id, f.name)} title="Delete">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+                              onClick={() => navigate(`/dashboard/admin/user/${f._id}`)} title="View">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50"
+                              onClick={() => openReplace(f)} title="Replace">
+                              <ArrowLeftRight className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDelete(f._id, f.name)} title="Delete">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}

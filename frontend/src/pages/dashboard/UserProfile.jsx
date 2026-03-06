@@ -11,20 +11,35 @@ import {
   Globe, Users, Eye, Search, UserRound, MessageSquare
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [studentSearch, setStudentSearch] = useState("");
+
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await api.get(`/users/${id}`);
         setUser(data);
+        setEditForm({
+          name: data.name || '',
+          phone: data.phone || '',
+          year: data.year || '',
+          regNo: data.regNo || '',
+          address: data.address || '',
+        });
 
         // If viewing a faculty member, also fetch their students
         if (data.role === 'admin') {
@@ -70,6 +85,27 @@ export default function UserProfile() {
     : students;
 
   const getStudentInitials = (name) => name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
+
+  // Check if current user is faculty and viewing one of their students
+  const canEdit = currentUser?.role === 'admin' && user?.role === 'student' &&
+    (currentUser.domain ? user.domain?.includes(currentUser.domain) : user.department === currentUser.department);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Since we might not have a dedicated edit endpoint for faculty yet,
+      // let's assume superadmin/admin can update users.
+      // Note: If backend doesn't support this yet, it might fail.
+      const res = await api.put(`/users/${id}`, editForm);
+      setUser(res.data);
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return <DashboardLayout>
     <div className="space-y-5 max-w-5xl mx-auto">
@@ -159,19 +195,37 @@ export default function UserProfile() {
       {/* Personal Information */}
       <Card className="shadow-sm border border-border/50 bg-card">
         <CardContent className="p-5 sm:p-6">
-          <div className="flex items-center gap-2.5 mb-5 pb-4 border-b border-border/50">
-            <UserRound className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-[#1e3c72]">Personal Information</h2>
+          <div className="flex items-center justify-between mb-5 pb-4 border-b border-border/50">
+            <div className="flex items-center gap-2.5">
+              <UserRound className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-[#1e3c72]">Personal Information</h2>
+            </div>
+            {canEdit && !isEditing && (
+              <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                Edit Profile
+              </Button>
+            )}
+            {canEdit && isEditing && (
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button size="sm" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Full Name</p>
-              <p className="font-semibold text-foreground">{displayName}</p>
+              {isEditing ? (
+                <Input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="h-8 text-sm bg-white" />
+              ) : (
+                <p className="font-semibold text-foreground">{displayName}</p>
+              )}
             </div>
+
             <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Department</p>
-              <p className="font-semibold text-foreground">{user.department || 'N/A'}</p>
+              <p className="font-semibold text-foreground">{user.department || 'N/A'} <span className="text-[10px] text-gray-400 font-normal ml-1">(Unchangeable)</span></p>
             </div>
             {(isFaculty || isStudent) && user.domain && (
               <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600">
@@ -180,24 +234,43 @@ export default function UserProfile() {
                   <Globe className="h-3.5 w-3.5" />
                   {user.domain}
                 </span>
+                {isEditing && <span className="text-[10px] text-gray-400 block mt-1">(Unchangeable)</span>}
               </div>
             )}
             {isStudent && (
               <>
                 <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Registration No.</p>
-                  <p className="font-semibold text-foreground">{user.regNo || 'N/A'}</p>
+                  {isEditing ? (
+                    <Input value={editForm.regNo} onChange={e => setEditForm({ ...editForm, regNo: e.target.value })} className="h-8 text-sm bg-white" />
+                  ) : (
+                    <p className="font-semibold text-foreground">{user.regNo || 'N/A'}</p>
+                  )}
                 </div>
                 <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Current Year</p>
-                  <p className="font-semibold text-foreground">{user.year || 'N/A'}</p>
+                  {isEditing ? (
+                    <Input value={editForm.year} onChange={e => setEditForm({ ...editForm, year: e.target.value })} className="h-8 text-sm bg-white" />
+                  ) : (
+                    <p className="font-semibold text-foreground">{user.year || 'N/A'}</p>
+                  )}
                 </div>
               </>
             )}
-            {user.address && (
+            {(user.address || isEditing) && (
               <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600 sm:col-span-2">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Address</p>
-                <p className="font-semibold text-foreground">{user.address}</p>
+                {isEditing ? (
+                  <Input value={editForm.address} onChange={e => setEditForm({ ...editForm, address: e.target.value })} className="h-8 text-sm bg-white" />
+                ) : (
+                  <p className="font-semibold text-foreground">{user.address}</p>
+                )}
+              </div>
+            )}
+            {isEditing && (
+              <div className="bg-slate-50 p-3.5 rounded-xl border-l-[3px] border-blue-600 sm:col-span-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Phone</p>
+                <Input value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="h-8 text-sm bg-white" maxLength={10} />
               </div>
             )}
           </div>

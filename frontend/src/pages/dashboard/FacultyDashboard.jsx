@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   GraduationCap, Users, TrendingUp, Building2, Globe,
   ArrowRight, RefreshCw, BookOpen, Lightbulb, MousePointer
@@ -9,8 +12,13 @@ import {
 
 export default function FacultyDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [departments, setDepartments] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [myStudents, setMyStudents] = useState([]);
+
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showFacultyModal, setShowFacultyModal] = useState(false);
 
   const fetchDepartments = async () => {
     try {
@@ -30,14 +38,52 @@ export default function FacultyDashboard() {
     }
   };
 
+  const fetchMyStudents = async () => {
+    if (!user?._id) return;
+    try {
+      const { data } = await api.get(`/users/${user._id}/students`);
+      setMyStudents(data);
+    } catch {
+      // non-critical
+    }
+  };
+
   useEffect(() => {
     fetchDepartments();
     fetchUsers();
-  }, []);
+    fetchMyStudents();
+  }, [user]);
 
   // Derived data
   const students = useMemo(() => allUsers.filter(u => u.role === "student"), [allUsers]);
   const facultyMembers = useMemo(() => allUsers.filter(u => u.role === "admin"), [allUsers]);
+
+  const getBreakdown = (users) => {
+    const deptMap = {};
+    const domainMap = {};
+    users.forEach(u => {
+      const dept = u.department || "Unknown";
+      deptMap[dept] = (deptMap[dept] || 0) + 1;
+
+      const domainStr = u.domain || "Unassigned";
+      const domains = domainStr.split(',').map(d => d.trim()).filter(Boolean);
+      if (domains.length === 0) {
+        domainMap["Unassigned"] = (domainMap["Unassigned"] || 0) + 1;
+      } else {
+        domains.forEach(d => {
+          domainMap[d] = (domainMap[d] || 0) + 1;
+        });
+      }
+    });
+
+    return {
+      depts: Object.entries(deptMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+      domains: Object.entries(domainMap).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
+    };
+  };
+
+  const studentBreakdown = useMemo(() => getBreakdown(students), [students]);
+  const facultyBreakdown = useMemo(() => getBreakdown(facultyMembers), [facultyMembers]);
 
   // Students per department
   const deptData = useMemo(() => {
@@ -67,12 +113,23 @@ export default function FacultyDashboard() {
   const domainData = useMemo(() => {
     const map = {};
     students.forEach(s => {
-      const domain = s.domain || "Unassigned";
-      map[domain] = (map[domain] || 0) + 1;
+      const domainStr = s.domain || "Unassigned";
+      const domains = domainStr.split(',').map(d => d.trim()).filter(Boolean);
+
+      if (domains.length === 0) {
+        map["Unassigned"] = (map["Unassigned"] || 0) + 1;
+      } else {
+        domains.forEach(d => {
+          map[d] = (map[d] || 0) + 1;
+        });
+      }
     });
-    const total = students.length || 1;
+
+    // Calculate total domain assignments for percentage
+    const totalAssignments = Object.values(map).reduce((sum, count) => sum + count, 0) || 1;
+
     return Object.entries(map)
-      .map(([name, count]) => ({ name, count, percent: Math.round((count / total) * 100) }))
+      .map(([name, count]) => ({ name, count, percent: Math.round((count / totalAssignments) * 100) }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
   }, [students]);
@@ -119,11 +176,11 @@ export default function FacultyDashboard() {
       {/* ═══ Clickable Metric Cards ═══ */}
       <div className="flex flex-wrap gap-3 sm:gap-[18px] mb-7 sm:mb-9">
 
-        {/* Total Students → navigate to students page */}
+        {/* Total Students → open modal */}
         <div
-          onClick={() => navigate("/dashboard/faculty/students")}
+          onClick={() => setShowStudentModal(true)}
           role="button" tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && navigate("/dashboard/faculty/students")}
+          onKeyDown={(e) => e.key === "Enter" && setShowStudentModal(true)}
           className="flex-1 min-w-[140px] sm:min-w-[150px] bg-white rounded-2xl sm:rounded-[28px] p-4 sm:p-[24px_22px] flex items-center gap-3 sm:gap-[18px] shadow-[0_10px_22px_rgba(0,20,40,0.04)] border border-[#e1e9f2] cursor-pointer hover:shadow-[0_12px_28px_rgba(28,60,120,0.08)] active:scale-[0.99] transition-all"
         >
           <div className="w-12 h-12 sm:w-[58px] sm:h-[58px] bg-[#e8f0fe] rounded-[16px] sm:rounded-[20px] flex items-center justify-center shrink-0">
@@ -137,11 +194,11 @@ export default function FacultyDashboard() {
           </div>
         </div>
 
-        {/* Total Faculty → navigate to community */}
+        {/* Total Faculty → open modal */}
         <div
-          onClick={() => navigate("/community")}
+          onClick={() => setShowFacultyModal(true)}
           role="button" tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && navigate("/community")}
+          onKeyDown={(e) => e.key === "Enter" && setShowFacultyModal(true)}
           className="flex-1 min-w-[140px] sm:min-w-[150px] bg-white rounded-2xl sm:rounded-[28px] p-4 sm:p-[24px_22px] flex items-center gap-3 sm:gap-[18px] shadow-[0_10px_22px_rgba(0,20,40,0.04)] border border-[#e1e9f2] cursor-pointer hover:shadow-[0_12px_28px_rgba(28,60,120,0.08)] active:scale-[0.99] transition-all"
         >
           <div className="w-12 h-12 sm:w-[58px] sm:h-[58px] bg-[#e8f0fe] rounded-[16px] sm:rounded-[20px] flex items-center justify-center shrink-0">
@@ -155,20 +212,20 @@ export default function FacultyDashboard() {
           </div>
         </div>
 
-        {/* Departments → navigate to chat */}
+        {/* My Students */}
         <div
-          onClick={() => navigate("/chat")}
+          onClick={() => navigate("/dashboard/faculty/students?view=my")}
           role="button" tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && navigate("/chat")}
+          onKeyDown={(e) => e.key === "Enter" && navigate("/dashboard/faculty/students?view=my")}
           className="flex-1 min-w-[140px] sm:min-w-[150px] bg-white rounded-2xl sm:rounded-[28px] p-4 sm:p-[24px_22px] flex items-center gap-3 sm:gap-[18px] shadow-[0_10px_22px_rgba(0,20,40,0.04)] border border-[#e1e9f2] cursor-pointer hover:shadow-[0_12px_28px_rgba(28,60,120,0.08)] active:scale-[0.99] transition-all"
         >
           <div className="w-12 h-12 sm:w-[58px] sm:h-[58px] bg-[#e8f0fe] rounded-[16px] sm:rounded-[20px] flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-[#2b4a81]" />
+            <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-[#2b4a81]" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-[28px] sm:text-[34px] font-bold text-[#16212e] leading-tight tracking-tight">{departments.length}</h3>
+            <h3 className="text-[28px] sm:text-[34px] font-bold text-[#16212e] leading-tight tracking-tight">{myStudents.length}</h3>
             <p className="text-[14px] sm:text-[16px] font-medium text-[#546f8b] mt-1 flex items-center gap-1.5">
-              Activities <ArrowRight className="w-3 h-3 opacity-70" />
+              My Assigned Students <ArrowRight className="w-3 h-3 opacity-70" />
             </p>
           </div>
         </div>
@@ -314,6 +371,100 @@ export default function FacultyDashboard() {
       <div className="mt-8 sm:mt-10 pt-4 sm:pt-[18px] border-t border-dashed border-[#d2deed] text-[12px] sm:text-[13px] text-[#6e8bb0] flex items-center gap-1.5">
         <MousePointer className="w-3 h-3 opacity-60" /> All top cards clickable · responsive dashboard
       </div>
+
+      <Dialog open={showStudentModal} onOpenChange={setShowStudentModal}>
+        <DialogContent className="max-w-[600px] w-[95vw] rounded-[24px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-[#16212e] font-bold flex items-center gap-2">
+              <GraduationCap className="w-6 h-6 text-[#2b4a81]" />
+              Total Students Breakdown
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto">
+            <div>
+              <h4 className="font-semibold text-[#1a314f] mb-3 border-b pb-2">By Department</h4>
+              {studentBreakdown.depts.length > 0 ? (
+                <ul className="space-y-2">
+                  {studentBreakdown.depts.map((d) => (
+                    <li key={d.name} className="flex justify-between text-[15px] border-b border-gray-100 pb-1">
+                      <span className="text-[#334b6e]">{d.name}</span>
+                      <span className="font-medium text-[#2b4a81]">{d.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">No data</p>
+              )}
+            </div>
+            <div>
+              <h4 className="font-semibold text-[#1a314f] mb-3 border-b pb-2">By Domain</h4>
+              {studentBreakdown.domains.length > 0 ? (
+                <ul className="space-y-2">
+                  {studentBreakdown.domains.map((d) => (
+                    <li key={d.name} className="flex justify-between text-[15px] border-b border-gray-100 pb-1">
+                      <span className="text-[#334b6e]">{d.name}</span>
+                      <span className="font-medium text-[#2b4a81]">{d.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">No data</p>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t border-[#f0f4f8] gap-3">
+            <Button variant="outline" className="text-[#1a314f] border-[#e1e9f2] hover:bg-[#f6fafe]" onClick={() => setShowStudentModal(false)}>Close</Button>
+            <Button className="bg-[#1d4ed8] hover:bg-[#1e3f9e] text-white" onClick={() => navigate("/dashboard/faculty/students")}>View Full List</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFacultyModal} onOpenChange={setShowFacultyModal}>
+        <DialogContent className="max-w-[600px] w-[95vw] rounded-[24px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-[#16212e] font-bold flex items-center gap-2">
+              <Users className="w-6 h-6 text-[#2b4a81]" />
+              Total Faculty Breakdown
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto">
+            <div>
+              <h4 className="font-semibold text-[#1a314f] mb-3 border-b pb-2">By Department</h4>
+              {facultyBreakdown.depts.length > 0 ? (
+                <ul className="space-y-2">
+                  {facultyBreakdown.depts.map((d) => (
+                    <li key={d.name} className="flex justify-between text-[15px] border-b border-gray-100 pb-1">
+                      <span className="text-[#334b6e]">{d.name}</span>
+                      <span className="font-medium text-[#2b4a81]">{d.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">No data</p>
+              )}
+            </div>
+            <div>
+              <h4 className="font-semibold text-[#1a314f] mb-3 border-b pb-2">By Domain</h4>
+              {facultyBreakdown.domains.length > 0 ? (
+                <ul className="space-y-2">
+                  {facultyBreakdown.domains.map((d) => (
+                    <li key={d.name} className="flex justify-between text-[15px] border-b border-gray-100 pb-1">
+                      <span className="text-[#334b6e]">{d.name}</span>
+                      <span className="font-medium text-[#2b4a81]">{d.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">No data</p>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t border-[#f0f4f8] gap-3">
+            <Button variant="outline" className="text-[#1a314f] border-[#e1e9f2] hover:bg-[#f6fafe]" onClick={() => setShowFacultyModal(false)}>Close</Button>
+            <Button className="bg-[#1d4ed8] hover:bg-[#1e3f9e] text-white" onClick={() => navigate("/dashboard/faculty/faculties")}>View Full List</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

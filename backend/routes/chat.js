@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/users', protect, async (req, res) => {
     try {
         const users = await User.find({ _id: { $ne: req.user.id } })
-            .select('name email role department profilePicture phone')
+            .select('name email role department profilePicture phone domain regNo')
             .sort({ name: 1 });
 
         // For each user, get the latest message and unread count
@@ -35,6 +35,9 @@ router.get('/users', protect, async (req, res) => {
                 email: u.email,
                 role: u.role,
                 department: u.department,
+                phone: u.phone,
+                domain: u.domain,
+                regNo: u.regNo,
                 profilePicture: u.profilePicture,
                 lastMessage: lastMessage ? {
                     content: lastMessage.content,
