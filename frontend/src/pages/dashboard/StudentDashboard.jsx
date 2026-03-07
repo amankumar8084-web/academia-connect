@@ -2,39 +2,49 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { GraduationCap, Users, UserSquare2, BookOpen } from "lucide-react";
+import { GraduationCap, Users, UserSquare2, BookOpen, Trophy } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [assignedFaculty, setAssignedFaculty] = useState([]);
+  const [userGroups, setUserGroups] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?._id) return;
     (async () => {
       try {
-        const [profileRes, facultyRes] = await Promise.all([
+        const [profileRes, facultyRes, groupsRes] = await Promise.all([
           api.get(`/users/${user._id}`),
-          api.get('/users/role/admin')
+          api.get('/users/role/admin'),
+          api.get('/groups'),
         ]);
         setProfile(profileRes.data);
 
         const stProfile = profileRes.data;
         const allFaculty = facultyRes.data;
-
         const stDomains = (stProfile.domain || "").split(',').map(d => d.trim()).filter(Boolean);
 
         const assigned = allFaculty.filter(f => {
-          if (f.department !== stProfile.department && !f.department) return false; // Basic matching
+          if (f.department !== stProfile.department && !f.department) return false;
           const fDomains = (f.domain || "").split(',').map(d => d.trim()).filter(Boolean);
           if (stDomains.length > 0 && fDomains.length > 0) {
             return fDomains.some(d => stDomains.includes(d));
           }
           return f.department === stProfile.department;
         });
-
         setAssignedFaculty(assigned);
+
+        const groups = groupsRes.data.map(g => ({
+          _id: g._id,
+          name: g.name,
+          members: g.members?.length || 0,
+          role: g.creator?._id === user._id ? "Creator" : "Member",
+        }));
+        setUserGroups(groups);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
       } finally {
@@ -48,6 +58,9 @@ export default function StudentDashboard() {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
   };
 
+  const groupsCreated = userGroups.filter(g => g.role === "Creator").length;
+  const groupsEnrolled = userGroups.length;
+
   if (loading) {
     return (
       <DashboardLayout title="Student Dashboard">
@@ -55,14 +68,6 @@ export default function StudentDashboard() {
       </DashboardLayout>
     );
   }
-
-  // Placeholder data for Groups since it's not yet implemented in backend
-  const userGroups = [
-    { name: "AI Research Project", members: 5, role: "Creator" },
-    { name: "Web Dev Team", members: 4, role: "Member" },
-    { name: "Study Group 2024", members: 6, role: "Member" },
-    { name: "Hackathon Team", members: 3, role: "Creator" }
-  ];
 
   return (
     <DashboardLayout title="Student Dashboard">
@@ -90,6 +95,20 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* Achievements Quick Card → links to full page */}
+        <button
+          onClick={() => navigate("/dashboard/student/achievements")}
+          className="w-full bg-gradient-to-r from-[#1e3c72] to-[#2a5298] rounded-2xl p-5 mb-6 md:mb-8 shadow-md text-white flex items-center gap-4 hover:shadow-lg hover:scale-[1.01] transition-all duration-200 text-left animate-in fade-in slide-in-from-bottom-3 duration-500 delay-75"
+        >
+          <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
+            <Trophy className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-base">My Achievements</h3>
+            <p className="text-white/70 text-sm">View your badges, projects & industry contacts →</p>
+          </div>
+        </button>
+
         {/* Two Box Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 lg:gap-8 mb-8">
 
@@ -101,7 +120,6 @@ export default function StudentDashboard() {
               </div>
               <span className="font-semibold text-slate-800 text-base">Assigned Faculty</span>
             </div>
-
             <div className="flex flex-col">
               {assignedFaculty.length === 0 ? (
                 <p className="text-slate-500 text-sm py-4 text-center bg-slate-50 rounded-lg">No faculty assigned to your domain.</p>
@@ -126,7 +144,6 @@ export default function StudentDashboard() {
                 ))
               )}
             </div>
-
             <div className="mt-4 text-right border-t border-slate-100 pt-3">
               <span className="text-blue-600 text-[0.9rem] font-medium">{assignedFaculty.length} faculty assigned</span>
             </div>
@@ -138,38 +155,38 @@ export default function StudentDashboard() {
               <div className="w-[45px] h-[45px] rounded-xl flex items-center justify-center bg-green-100 text-green-600 shrink-0">
                 <Users className="w-[22px] h-[22px]" />
               </div>
-              <span className="font-semibold text-slate-800 text-base">Groups (Coming Soon)</span>
+              <span className="font-semibold text-slate-800 text-base">My Groups</span>
             </div>
-
             <div className="flex flex-col gap-3.5 mb-5 space-y-1">
               <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100/50">
                 <span className="text-slate-500 text-[0.95rem] font-medium">Groups Created</span>
-                <span className="font-bold text-[1.3rem] text-blue-600">2</span>
+                <span className="font-bold text-[1.3rem] text-blue-600">{groupsCreated}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100/50">
                 <span className="text-slate-500 text-[0.95rem] font-medium">Groups Enrolled</span>
-                <span className="font-bold text-[1.3rem] text-green-600">4</span>
+                <span className="font-bold text-[1.3rem] text-green-600">{groupsEnrolled}</span>
               </div>
             </div>
-
             <div className="flex flex-col mt-2">
-              {userGroups.map((group, idx) => (
-                <div key={idx} className="flex justify-between items-center py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer">
-                  <div>
-                    <div className="font-medium text-slate-800 text-[0.95rem] flex items-center gap-1.5 pl-1">
-                      <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-                      {group.name}
+              {userGroups.length === 0 ? (
+                <p className="text-slate-500 text-sm py-4 text-center bg-slate-50 rounded-lg">No groups yet. Create one from Chat!</p>
+              ) : (
+                userGroups.map((group, idx) => (
+                  <div key={group._id || idx} className="flex justify-between items-center py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer">
+                    <div>
+                      <div className="font-medium text-slate-800 text-[0.95rem] flex items-center gap-1.5 pl-1">
+                        <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                        {group.name}
+                      </div>
+                      <div className="text-[0.82rem] text-slate-500 ml-5">{group.members} members</div>
                     </div>
-                    <div className="text-[0.82rem] text-slate-500 ml-5">{group.members} members</div>
+                    <span className={`text-[0.75rem] px-2.5 py-1 rounded-full whitespace-nowrap font-medium ${group.role === 'Creator' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                      {group.role}
+                    </span>
                   </div>
-                  <span className={`text-[0.75rem] px-2.5 py-1 rounded-full whitespace-nowrap font-medium ${group.role === 'Creator' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
-                    }`}>
-                    {group.role}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-
             <div className="mt-4 text-right border-t border-slate-100 pt-3">
               <span className="text-green-600 text-[0.9rem] font-medium">{userGroups.length} total groups</span>
             </div>

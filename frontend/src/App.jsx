@@ -16,6 +16,7 @@ import AdminSettings from "@/pages/dashboard/AdminSettings";
 import FacultyDashboard from "@/pages/dashboard/FacultyDashboard";
 import FacultyStudents from "@/pages/dashboard/FacultyStudents";
 import StudentDashboard from "@/pages/dashboard/StudentDashboard";
+import Achievements from "@/pages/dashboard/Achievements";
 import IndustryDashboard from "@/pages/dashboard/IndustryDashboard";
 import Chat from "@/pages/Chat";
 import CommunityPosts from "@/pages/dashboard/CommunityPosts";
@@ -46,6 +47,7 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/dashboard/faculty/students" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyStudents /></ProtectedRoute>} />
           <Route path="/dashboard/faculty/faculties" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyList /></ProtectedRoute>} />
           <Route path="/dashboard/student" element={<ProtectedRoute allowedRoles={["student"]}><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/student/achievements" element={<ProtectedRoute allowedRoles={["student"]}><Achievements /></ProtectedRoute>} />
           <Route path="/dashboard/industry" element={<ProtectedRoute allowedRoles={["industry_partner"]}><IndustryDashboard /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
           <Route path="/community" element={<ProtectedRoute><CommunityPosts /></ProtectedRoute>} />
