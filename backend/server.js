@@ -10,6 +10,7 @@ import departmentRoutes from './routes/departments.js';
 import postRoutes from './routes/posts.js';
 import notificationRoutes from './routes/notifications.js';
 import chatRoutes from './routes/chat.js';
+import groupRoutes from './routes/groups.js';
 import { seedSuperAdmin, seedDepartments } from './seed.js';
 
 dotenv.config();
@@ -51,6 +52,16 @@ io.on('connection', (socket) => {
                 io.to(socketId).emit('new_message', message);
             });
         }
+    });
+
+    // Group chat — join group rooms
+    socket.on('join_group', (groupId) => {
+        socket.join(`group_${groupId}`);
+    });
+
+    // Group chat — relay message to group room
+    socket.on('send_group_message', (message) => {
+        socket.to(`group_${message.group}`).emit('group_new_message', message);
     });
 
     // Typing indicator
@@ -103,6 +114,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Database connection
 const PORT = process.env.PORT || 5000;
