@@ -197,6 +197,37 @@ router.get('/:id', protect, async (req, res) => {
     }
 });
 
+// @route   GET /api/users/:id/faculty
+// @desc    Get the faculty member assigned to a student (by domain/department)
+// @access  Private / Super-Admin & Admin
+router.get('/:id/faculty', protect, authorize('super-admin', 'admin'), async (req, res) => {
+    try {
+        const student = await User.findById(req.params.id).select('-password');
+        if (!student || student.role !== 'student') {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        const query = { role: 'admin' };
+        if (student.domain) {
+            const domains = student.domain.split(',').map(d => d.trim()).filter(Boolean);
+            if (domains.length > 0) {
+                const escapedDomains = domains.map(d => d.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'));
+                query.domain = { $regex: escapedDomains.join('|'), $options: 'i' };
+            } else {
+                query.domain = student.domain;
+            }
+        } else if (student.department) {
+            query.department = student.department;
+        }
+
+        const faculty = await User.find(query).select('-password').sort({ name: 1 });
+        res.json(faculty);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // @route   GET /api/users/:id/students
 // @desc    Get students managed by a faculty member (same dept & domain)
 // @access  Private / Super-Admin & Admin

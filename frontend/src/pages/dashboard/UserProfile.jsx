@@ -20,6 +20,7 @@ export default function UserProfile() {
   const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [students, setStudents] = useState([]);
+  const [assignedFaculty, setAssignedFaculty] = useState([]);
   const [loading, setLoading] = useState(true);
   const [studentSearch, setStudentSearch] = useState("");
 
@@ -46,6 +47,16 @@ export default function UserProfile() {
           try {
             const studentsRes = await api.get(`/users/${id}/students`);
             setStudents(studentsRes.data);
+          } catch {
+            // Not critical — may not have permission
+          }
+        }
+
+        // If viewing a student, fetch assigned faculty
+        if (data.role === 'student') {
+          try {
+            const facultyRes = await api.get(`/users/${id}/faculty`);
+            setAssignedFaculty(facultyRes.data);
           } catch {
             // Not critical — may not have permission
           }
@@ -274,6 +285,42 @@ export default function UserProfile() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Assigned Faculty Section (Student only) */}
+      {isStudent && assignedFaculty.length > 0 && (
+        <Card className="shadow-sm border border-border/50 bg-card">
+          <CardContent className="p-5 sm:p-6">
+            <div className="flex items-center gap-2.5 mb-5 pb-4 border-b border-border/50">
+              <GraduationCap className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-[#1e3c72]">Assigned Faculty</h2>
+            </div>
+            <div className="divide-y divide-border/50">
+              {assignedFaculty.map((f) => (
+                <div
+                  key={f._id}
+                  className="flex items-center gap-3 py-3 cursor-pointer hover:bg-slate-50/80 px-2 -mx-2 rounded-lg transition-colors"
+                  onClick={() => navigate(`/dashboard/admin/user/${f._id}`)}
+                >
+                  <Avatar className="h-9 w-9 shrink-0">
+                    {f.profilePicture && <AvatarImage src={f.profilePicture} alt={f.name} />}
+                    <AvatarFallback className="bg-slate-100 text-blue-600 text-xs font-bold">
+                      {f.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground truncate">{f.name || 'N/A'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{f.email}</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="h-8 text-xs shrink-0 hidden sm:flex"
+                    onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/admin/user/${f._id}`); }}>
+                    <Eye className="h-3.5 w-3.5 mr-1" /> View
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Students Section (Faculty only) */}
       {isFaculty && (
