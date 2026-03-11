@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   domain: { type: String }, // For student
   address: { type: String },
   profilePicture: { type: String }, // Cloudinary URL
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Track who created this user
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

@@ -51,10 +51,6 @@ const navByRole = {
     icon: LayoutDashboard,
     path: "/dashboard/student"
   }, {
-    label: "Industry Posts",
-    icon: Briefcase,
-    path: "/community"
-  }, {
     label: "Achievements",
     icon: GraduationCap,
     path: "/dashboard/student/achievements"
