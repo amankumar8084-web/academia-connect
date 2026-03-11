@@ -93,6 +93,7 @@ router.post('/student', protect, authorize('admin'), async (req, res) => {
             year,
             regNo,
             domain,
+            addedBy: req.user.id,
         });
 
         if (user) {
@@ -128,7 +129,7 @@ router.post('/student', protect, authorize('admin'), async (req, res) => {
 // @access  Private
 router.get('/profile', protect, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password').populate('addedBy', 'name email');
         if (user) {
             res.json(user);
         } else {
@@ -185,7 +186,7 @@ router.get('/role/:role', protect, authorize('super-admin', 'admin'), async (req
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('-password');
+        const user = await User.findById(req.params.id).select('-password').populate('addedBy', 'name email');
         if (user) {
             res.json(user);
         } else {
