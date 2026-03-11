@@ -36,6 +36,7 @@ export default function MyProfile() {
     useEffect(() => {
         (async () => {
             try {
+                // Ensure we get the full populated user profile including addedBy
                 const { data } = await api.get(`/users/${authUser?._id}`);
                 setProfile(data);
                 setForm({
@@ -258,6 +259,9 @@ export default function MyProfile() {
                                 {profile?.regNo && <InfoItem label="Registration No." value={profile.regNo} />}
                                 {profile?.year && <InfoItem label="Current Year" value={profile.year} />}
                                 {profile?.domain && <InfoItem label="Domain" value={profile.domain} />}
+                                {profile?.addedBy && (
+                                    <InfoItem label="Added By" value={`${profile.addedBy.name || profile.addedBy.email} (Faculty)`} />
+                                )}
                             </div>
                         </div>
                     </div>

@@ -63,37 +63,17 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Student Dashboard">
+      <DashboardLayout title="Dashboard">
         <div className="flex items-center justify-center py-20">Loading dashboard...</div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Student Dashboard">
+    <DashboardLayout title="Dashboard">
       <div className="max-w-[1200px] mx-auto pb-8">
 
-        {/* Student Header */}
-        <div className="bg-white rounded-2xl p-5 mb-6 md:mb-8 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200 flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="w-[60px] h-[60px] rounded-full bg-[#1e3c72] flex items-center justify-center text-white text-xl md:text-2xl font-semibold shrink-0 overflow-hidden border-2 border-slate-100">
-            {profile?.profilePicture ? (
-              <img src={profile.profilePicture} alt={profile?.name} className="w-full h-full object-cover" />
-            ) : (
-              getInitials(profile?.name || profile?.email)
-            )}
-          </div>
-          <div className="flex-1 mt-1">
-            <h1 className="text-xl md:text-2xl font-semibold text-[#1e3c72] mb-1.5">{profile?.name || "Student"}</h1>
-            <p className="text-slate-500 text-[0.95rem] flex flex-wrap items-center justify-center md:justify-start gap-1.5 md:gap-2">
-              <GraduationCap className="text-blue-600 w-[18px] h-[18px] shrink-0" />
-              {profile?.department || "No Department"}
-              <span className="hidden md:inline">•</span>
-              {profile?.year || "Year N/A"}
-              <span className="hidden md:inline">•</span>
-              Roll: {profile?.regNo || "N/A"}
-            </p>
-          </div>
-        </div>
+        {/* Header */}
 
         {/* Achievements Quick Card → links to full page */}
         <button
