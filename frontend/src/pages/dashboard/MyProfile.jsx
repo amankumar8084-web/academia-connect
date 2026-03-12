@@ -192,9 +192,11 @@ export default function MyProfile() {
                                     </span>
                                 )}
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1.5 justify-center sm:justify-start"><Mail className="h-3.5 w-3.5 text-primary/60" />{profile?.email}</span>
-                                {profile?.phone && <span className="flex items-center gap-1.5 justify-center sm:justify-start"><Phone className="h-3.5 w-3.5 text-primary/60" />{profile.phone}</span>}
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-2 text-sm text-muted-foreground min-w-0">
+                                <span className="flex items-center gap-1.5 justify-center sm:justify-start min-w-0 truncate" title={profile?.email}>
+                                  <Mail className="h-3.5 w-3.5 text-primary/60 shrink-0" /><span className="truncate">{profile?.email}</span>
+                                </span>
+                                {profile?.phone && <span className="flex items-center gap-1.5 justify-center sm:justify-start shrink-0"><Phone className="h-3.5 w-3.5 text-primary/60" />{profile.phone}</span>}
                             </div>
                             {profile?.address && (
                                 <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5 justify-center sm:justify-start"><MapPin className="h-3.5 w-3.5 text-primary/60" />{profile.address}</p>

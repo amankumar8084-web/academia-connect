@@ -187,15 +187,15 @@ export default function DepartmentList() {
                   </div>
                 )}
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <div className="flex items-center gap-4 overflow-hidden">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Building2 className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-foreground truncate">{dept.name}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg text-foreground truncate" title={dept.name}>{dept.name}</h3>
                       <p className="text-xs text-muted-foreground">{dept.domains.length} Specialized Domains</p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-slate-300" />
+                    <ChevronRight className="h-5 w-5 text-slate-300 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
@@ -216,15 +216,15 @@ export default function DepartmentList() {
                 onClick={() => handleDomainClick(domain)}
               >
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <div className="flex items-center gap-4 overflow-hidden">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Globe className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-foreground truncate">{domain}</h3>
-                      <p className="text-xs text-muted-foreground">View Students & Faculty</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base text-foreground break-words leading-snug" title={domain}>{domain}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">View Students &amp; Faculty</p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-slate-300" />
+                    <ChevronRight className="h-5 w-5 text-slate-300 shrink-0" />
                   </div>
                 </CardContent>
               </Card>
@@ -265,7 +265,7 @@ export default function DepartmentList() {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-foreground truncate">{f.name || 'N/A'}</p>
-                          <p className="text-xs text-muted-foreground truncate flex items-center gap-1"><Mail className="h-3 w-3 shrink-0" />{f.email}</p>
+                          <p className="text-xs text-muted-foreground truncate flex items-center gap-1" title={f.email}><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{f.email}</span></p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
@@ -312,8 +312,8 @@ export default function DepartmentList() {
                             </Avatar>
                             <span>{f.name || 'N/A'}</span>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />{f.email}</span>
+                          <TableCell className="text-muted-foreground max-w-[200px]">
+                            <span className="flex items-center gap-1.5 truncate" title={f.email}><Mail className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{f.email}</span></span>
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {f.phone ? <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{f.phone}</span> : 'N/A'}
@@ -360,7 +360,7 @@ export default function DepartmentList() {
                         </Avatar>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-foreground truncate">{s.name || 'N/A'}</p>
-                          <p className="text-xs text-muted-foreground truncate flex items-center gap-1"><Mail className="h-3 w-3 shrink-0" />{s.email}</p>
+                          <p className="text-xs text-muted-foreground truncate flex items-center gap-1" title={s.email}><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{s.email}</span></p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
@@ -408,8 +408,8 @@ export default function DepartmentList() {
                             <span>{s.name || 'N/A'}</span>
                           </TableCell>
                           <TableCell className="text-muted-foreground">{s.regNo || 'N/A'}</TableCell>
-                          <TableCell className="text-muted-foreground">
-                            <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />{s.email}</span>
+                           <TableCell className="text-muted-foreground max-w-[200px]">
+                            <span className="flex items-center gap-1.5 truncate" title={s.email}><Mail className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{s.email}</span></span>
                           </TableCell>
                           <TableCell>{s.year || 'N/A'}</TableCell>
                         </TableRow>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { GraduationCap, Mail, Phone, Building2, Calendar, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function StudentList() {
   const [students, setStudents] = useState([]);
@@ -71,6 +71,7 @@ export default function StudentList() {
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
+                              {s.profilePicture && <AvatarImage src={s.profilePicture} alt={s.name || s.email} />}
                               <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                                 {s.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || s.email?.charAt(0).toUpperCase() || 'S'}
                               </AvatarFallback>
@@ -113,6 +114,7 @@ export default function StudentList() {
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <Avatar className="h-10 w-10">
+                      {s.profilePicture && <AvatarImage src={s.profilePicture} alt={s.name || s.email} />}
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                         {s.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || s.email?.charAt(0).toUpperCase() || 'S'}
                       </AvatarFallback>

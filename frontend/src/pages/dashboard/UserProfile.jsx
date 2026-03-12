@@ -151,13 +151,13 @@ export default function UserProfile() {
 
               {/* Meta grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
+                <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 sm:col-span-2 lg:col-span-1">
                   <div className="h-10 w-10 rounded-lg bg-white flex items-center justify-center shrink-0 shadow-sm">
                     <Mail className="h-4 w-4 text-blue-600" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-semibold truncate">{user.email}</p>
+                    <p className="text-sm font-semibold break-all">{user.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
@@ -309,7 +309,7 @@ export default function UserProfile() {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground truncate">{f.name || 'N/A'}</p>
-                    <p className="text-xs text-muted-foreground truncate">{f.email}</p>
+                    <p className="text-xs text-muted-foreground truncate" title={f.email}>{f.email}</p>
                   </div>
                   <Button variant="outline" size="sm" className="h-8 text-xs shrink-0 hidden sm:flex"
                     onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/admin/user/${f._id}`); }}>
@@ -364,7 +364,7 @@ export default function UserProfile() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-foreground truncate">{s.name || 'N/A'}</p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground">
                         {s.department || ''} {s.year ? `• ${s.year}` : ''} {s.regNo ? `• ${s.regNo}` : ''}
                       </p>
                     </div>

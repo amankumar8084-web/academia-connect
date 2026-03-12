@@ -327,9 +327,9 @@ export default function FacultyList() {
                               {getInitials(f.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-semibold text-foreground">{f.name || "N/A"}</p>
-                            <p className="text-xs text-muted-foreground">{f.email}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-foreground truncate">{f.name || "N/A"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{f.email}</p>
                           </div>
                         </div>
                       </TableCell>
