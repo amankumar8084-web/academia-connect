@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 function Navbar() {
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -17,15 +16,12 @@ function Navbar() {
 
     const navLinks = [
         { label: 'Home', href: '#home' },
-        // { label: 'About', href: '#about' },
         { label: 'Departments', href: '#departments' },
         { label: 'Impact', href: '#impact' },
-        // { label: 'Contact', href: '#contact' },
     ];
 
     const handleNavClick = (e, href) => {
         e.preventDefault();
-        setIsOpen(false);
         const el = document.querySelector(href);
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -33,75 +29,51 @@ function Navbar() {
     };
 
     return (
-        <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
-            <div className="navbar-container">
-                <a href="#home" className="navbar-brand" onClick={(e) => handleNavClick(e, '#home')}>
-                    Project Mayaa
+        <nav className={`pm-navbar ${scrolled ? 'pm-navbar-scrolled' : ''}`}>
+            <div className="pm-navbar-container">
+
+                {/* Logo */}
+                <a href="#home" className="pm-navbar-logo" onClick={(e) => handleNavClick(e, '#home')}>
+                    <span className="pm-navbar-logo-icon">
+                        <i className="fas fa-map"></i>
+                    </span>
+                    <div className="pm-navbar-logo-text">
+                        <span className="pm-navbar-logo-main">
+                            Project<span className="pm-navbar-logo-accent">Mayaa</span>
+                        </span>
+                        <span className="pm-navbar-logo-tagline">
+                            Engineering • Business • Innovation
+                        </span>
+                    </div>
                 </a>
 
-                {/* Desktop Nav */}
-                <div className="navbar-links">
+                {/* Desktop Nav Links */}
+                <div className="pm-navbar-links">
                     {navLinks.map((link) => (
                         <a
                             key={link.label}
                             href={link.href}
-                            className="navbar-link"
+                            className="pm-nav-link"
                             onClick={(e) => handleNavClick(e, link.href)}
                         >
                             {link.label}
                         </a>
                     ))}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="btn btn-primary btn-small"
-                        onClick={() => navigate('/login')}
-                    >
-                        Login
-                    </motion.button>
                 </div>
 
-                {/* Mobile Login Button */}
-                <div className="navbar-toggle" style={{ background: 'transparent', padding: 0 }}>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="btn btn-primary btn-small"
-                        onClick={() => navigate('/login')}
-                    >
-                        Login
-                    </motion.button>
-                </div>
+                {/* Login Button */}
+                <motion.a
+                    href="/login"
+                    className="pm-navbar-login"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={(e) => { e.preventDefault(); navigate('/login'); }}
+                >
+                    <i className="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </motion.a>
+
             </div>
-
-            {/* Mobile Nav */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="navbar-mobile"
-                    >
-                        {navLinks.map((link) => (
-                            <a
-                                key={link.label}
-                                href={link.href}
-                                className="navbar-mobile-link"
-                                onClick={(e) => handleNavClick(e, link.href)}
-                            >
-                                {link.label}
-                            </a>
-                        ))}
-                        <button
-                            className="btn btn-primary btn-small navbar-mobile-login"
-                            onClick={() => { setIsOpen(false); navigate('/login'); }}
-                        >
-                            Login
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </nav>
     );
 }
