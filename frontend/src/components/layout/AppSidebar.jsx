@@ -92,18 +92,45 @@ export function AppSidebar() {
   const items = navByRole[role ?? "student"] ?? navByRole.student;
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) ?? "U";
   return <Sidebar>
-    <SidebarHeader className="p-4">
+    <SidebarHeader className="p-4 border-b border-sidebar-border">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
-          <GraduationCap className="h-5 w-5 text-primary-foreground" />
+        {/* Green map icon — matches landing & login navbar */}
+        <div style={{
+          width: '38px',
+          height: '38px',
+          background: '#10B981',
+          borderRadius: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.1rem',
+          color: '#ffffff',
+          flexShrink: 0,
+          transition: 'transform 0.3s ease',
+        }}
+          className="sidebar-logo-icon"
+        >
+          <i className="fas fa-map"></i>
         </div>
-        <div>
-          <p className="font-display text-sm font-semibold text-sidebar-foreground">PROJECT MAYAA</p>
-          {role !== 'super-admin' && (
-            <p className="text-xs text-sidebar-foreground/60 capitalize">
-              {role?.replace("_", " ") ?? "Loading..."}
-            </p>
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{
+            fontSize: '1.1rem',
+            fontWeight: 700,
+            lineHeight: 1.2,
+            color: 'var(--sidebar-foreground)',
+            letterSpacing: '-0.01em',
+          }}>
+            Project<span style={{ color: '#10B981', marginLeft: '0.15rem' }}>Mayaa</span>
+          </span>
+          <span style={{
+            fontSize: '0.6rem',
+            color: 'rgba(255,255,255,0.55)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            marginTop: '1px',
+          }}>
+            Engineering • Business • Innovation
+          </span>
         </div>
       </div>
     </SidebarHeader>

@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import Department from '../models/Department.js';
 import Notification from '../models/Notification.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { sendCredentialsEmail } from '../utils/mailer.js';
@@ -149,11 +150,10 @@ router.get('/stats', protect, authorize('super-admin'), async (req, res) => {
         const studentCount = await User.countDocuments({ role: 'student' });
         const facultyCount = await User.countDocuments({ role: 'admin' });
 
-        // Count unique departments
-        const departments = await User.distinct('department', { department: { $ne: null, $ne: '' } });
-        const departmentCount = departments.length;
+        // Count all departments from the Department collection (not just those with users)
+        const departmentCount = await Department.countDocuments();
 
-        // Activities could be anything, but for now we'll return a placeholder or 0
+        // Activities — placeholder
         const activityCount = 0;
 
         res.json({
