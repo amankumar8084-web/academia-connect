@@ -398,8 +398,8 @@ router.get('/stats', protect, authorize('super-admin'), async (req, res) => {
         // Count all departments from the Department collection (not just those with users)
         const departmentCount = await Department.countDocuments();
 
-        // Activities — placeholder
-        const activityCount = 0;
+        // Real activity count from StudentUpdate collection
+        const activityCount = await StudentUpdate.countDocuments();
 
         res.json({
             students: studentCount,
@@ -412,6 +412,166 @@ router.get('/stats', protect, authorize('super-admin'), async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+// @route   GET /api/users/admin/analytics/daily-trend
+// @desc    Aggregated daily activity trend grouped by date, department, and domain
+// @access  Private / Super-Admin
+router.get('/admin/analytics/daily-trend', protect, authorize('super-admin'), async (req, res) => {
+    try {
+        const days = parseInt(req.query.days) || 14;
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+        const cutoffStr = cutoff.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        const pipeline = [
+            // 1. Filter to recent entries
+            { $match: { date: { $gte: cutoffStr } } },
+            // 2. Join with User to get department & domain
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'student',
+                    foreignField: '_id',
+                    as: 'studentInfo'
+                }
+            },
+            { $unwind: '$studentInfo' },
+            // 3. Group by date + department + domain
+            {
+                $group: {
+                    _id: {
+                        date: '$date',
+                        department: '$studentInfo.department',
+                        domain: '$studentInfo.domain'
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            // 4. Reshape output
+            {
+                $project: {
+                    _id: 0,
+                    date: '$_id.date',
+                    department: '$_id.department',
+                    domain: '$_id.domain',
+                    count: 1
+                }
+            },
+            { $sort: { date: 1, count: -1 } }
+        ];
+
+        const results = await StudentUpdate.aggregate(pipeline);
+        res.json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// @route   GET /api/users/admin/analytics/dept-performance
+// @desc    Department-wise total activity count, ranked descending
+// @access  Private / Super-Admin
+router.get('/admin/analytics/dept-performance', protect, authorize('super-admin'), async (req, res) => {
+    try {
+        const days = parseInt(req.query.days) || 30;
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+
+        const pipeline = [
+            { $match: { date: { $gte: cutoffStr } } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'student',
+                    foreignField: '_id',
+                    as: 'studentInfo'
+                }
+            },
+            { $unwind: '$studentInfo' },
+            {
+                $group: {
+                    _id: '$studentInfo.department',
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    department: '$_id',
+                    count: 1
+                }
+            },
+            { $sort: { count: -1 } }
+        ];
+
+        const results = await StudentUpdate.aggregate(pipeline);
+        res.json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// @route   GET /api/users/admin/activities/all
+// @desc    List all activities with optional department/domain filters + pagination
+// @access  Private / Super-Admin
+router.get('/admin/activities/all', protect, authorize('super-admin'), async (req, res) => {
+    try {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+        const skip = (page - 1) * limit;
+        const { department, domain, search } = req.query;
+
+        // Build a match for students first (to filter by dept/domain)
+        const studentMatch = { role: 'student' };
+        if (department) studentMatch.department = department;
+        if (domain) studentMatch.domain = { $regex: domain.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), $options: 'i' };
+
+        // Get matching student IDs
+        const studentIds = (await User.find(studentMatch).select('_id').lean()).map(s => s._id);
+
+        // Build update query
+        const updateQuery = {};
+        if (department || domain) {
+            updateQuery.student = { $in: studentIds };
+        }
+
+        // Get total count for pagination
+        const total = await StudentUpdate.countDocuments(updateQuery);
+
+        // Fetch activities
+        let activities = await StudentUpdate.find(updateQuery)
+            .populate('student', 'name email regNo department domain profilePicture')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        // Server-side search filter (student name, type, or value)
+        if (search) {
+            const q = search.toLowerCase();
+            activities = activities.filter(a =>
+                (a.student?.name || '').toLowerCase().includes(q) ||
+                (a.student?.email || '').toLowerCase().includes(q) ||
+                (a.type || '').toLowerCase().includes(q) ||
+                (a.value || '').toLowerCase().includes(q)
+            );
+        }
+
+        res.json({
+            activities,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 // @route   GET /api/users/role/:role
 // @desc    Get users by role
@@ -428,6 +588,70 @@ router.get('/role/:role', protect, authorize('super-admin', 'admin', 'student'),
         }
 
         res.json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// @route   GET /api/users/faculty/student-progress
+// @desc    Get daily progress updates for all students assigned to the logged-in faculty
+// @access  Private / Admin (Faculty)
+router.get('/faculty/student-progress', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { studentId, startDate, endDate, search } = req.query;
+
+        // 1. Get faculty assignments → build student query
+        const assignments = await getFacultyAssignments(req.user.id);
+        const studentQuery = buildStudentQueryFromAssignments(assignments);
+
+        if (!studentQuery) {
+            return res.json([]);
+        }
+
+        // 2. Find all assigned student IDs
+        let studentFilter = studentQuery;
+        if (studentId) {
+            // If filtering by a specific student, verify they're in the assigned set
+            studentFilter = { ...studentQuery, _id: studentId };
+        }
+
+        const assignedStudents = await User.find(studentFilter).select('_id').lean();
+        const studentIds = assignedStudents.map(s => s._id);
+
+        if (studentIds.length === 0) {
+            return res.json([]);
+        }
+
+        // 3. Build the StudentUpdate query
+        const updateQuery = { student: { $in: studentIds } };
+
+        // Date range filter
+        if (startDate) {
+            updateQuery.date = updateQuery.date || {};
+            updateQuery.date.$gte = startDate;
+        }
+        if (endDate) {
+            updateQuery.date = updateQuery.date || {};
+            updateQuery.date.$lte = endDate;
+        }
+
+        // 4. Fetch updates with populated student info
+        let updates = await StudentUpdate.find(updateQuery)
+            .populate('student', 'name email regNo department domain profilePicture')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // 5. Server-side search filter (student name or update value)
+        if (search) {
+            const q = search.toLowerCase();
+            updates = updates.filter(u =>
+                (u.student?.name || '').toLowerCase().includes(q) ||
+                (u.value || '').toLowerCase().includes(q)
+            );
+        }
+
+        res.json(updates);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -906,6 +1130,8 @@ router.patch('/profile/status', protect, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
 
 // @route   GET /api/users/student/updates/my
 // @desc    Get all progress updates for the logged-in student

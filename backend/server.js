@@ -123,13 +123,18 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/project-mayaa';
 
 mongoose.connect(MONGODB_URI)
-    .then(async () => {        // Ensure Super-Admin and Departments exist
+    .then(async () => {
+        console.log('✅ MongoDB connected successfully');
+
+        // Ensure Super-Admin and Departments exist
         await seedSuperAdmin();
         await seedDepartments();
         await migrateFacultyAssignments();
 
-        httpServer.listen(PORT, () => {        });
+        httpServer.listen(PORT, () => {
+            console.log(`Server running on ${PORT}`);
+        });
     })
     .catch((err) => {
-        console.error('MongoDB connection error:', err);
+        console.error('❌ MongoDB connection error:', err);
     });
