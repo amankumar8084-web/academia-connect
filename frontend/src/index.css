@@ -318,7 +318,8 @@
   }
 
   .pm-navbar-logo-tagline {
-    display: none;
+    font-size: 0.55rem;
+    margin-top: 2px;
   }
 }
 
