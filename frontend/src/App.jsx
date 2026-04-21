@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Login from "@/pages/auth/Login";
 import LandingPage from "@/pages/LandingPage";
 import AdminDashboard from "@/pages/dashboard/AdminDashboard";
+import TotalActivities from "@/pages/dashboard/TotalActivities";
 import FacultyList from "@/pages/dashboard/FacultyList";
 import StudentList from "@/pages/dashboard/StudentList";
 import DepartmentList from "@/pages/dashboard/DepartmentList";
@@ -41,6 +42,7 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/dashboard/admin/faculty" element={<ProtectedRoute allowedRoles={["super-admin"]}><FacultyList /></ProtectedRoute>} />
           <Route path="/dashboard/admin/users" element={<ProtectedRoute allowedRoles={["super-admin"]}><StudentList /></ProtectedRoute>} />
           <Route path="/dashboard/admin/departments" element={<ProtectedRoute allowedRoles={["super-admin"]}><DepartmentList /></ProtectedRoute>} />
+          <Route path="/dashboard/admin/activities" element={<ProtectedRoute allowedRoles={["super-admin"]}><TotalActivities /></ProtectedRoute>} />
           <Route path="/dashboard/admin/user/:id" element={<ProtectedRoute allowedRoles={["super-admin", "admin"]}><UserProfile /></ProtectedRoute>} />
           <Route path="/dashboard/admin/settings" element={<ProtectedRoute allowedRoles={["super-admin"]}><AdminSettings /></ProtectedRoute>} />
           <Route path="/dashboard/faculty" element={<ProtectedRoute allowedRoles={["admin"]}><FacultyDashboard /></ProtectedRoute>} />

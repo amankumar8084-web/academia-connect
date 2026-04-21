@@ -120,6 +120,7 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
   }
 
   h1,
@@ -314,6 +315,10 @@
   .pm-navbar-login {
     padding: 0.45rem 1rem;
     font-size: 0.85rem;
+  }
+
+  .pm-navbar-logo-tagline {
+    display: none;
   }
 }
 
@@ -860,7 +865,7 @@
 
 .contact-info li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
   font-size: 0.88rem;
 }
@@ -874,6 +879,8 @@
   color: hsl(220 20% 60%);
   text-decoration: none;
   transition: color 0.2s;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .contact-link:hover {
@@ -882,6 +889,8 @@
 
 .contact-text {
   color: hsl(220 20% 60%);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .footer-bottom {

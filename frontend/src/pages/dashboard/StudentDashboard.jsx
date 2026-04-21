@@ -383,7 +383,7 @@ export default function StudentDashboard() {
 
   return (
     <DashboardLayout title="Student Dashboard">
-      <div className="max-w-[1400px] mx-auto space-y-8 pb-10">
+      <div className="max-w-[1400px] mx-auto space-y-5 sm:space-y-8 pb-6 sm:pb-10">
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -392,32 +392,32 @@ export default function StudentDashboard() {
               label: "Total Students", 
               value: stats?.students || 0, 
               icon: Users, 
-              color: "text-blue-600", 
-              bg: "bg-blue-50",
+              gradient: "from-blue-500 to-indigo-600",
+              shadow: "shadow-blue-500/25",
               onClick: () => setIsStudentsModalOpen(true)
             },
             { 
               label: "Total Faculties", 
               value: stats?.faculty || 0, 
               icon: UserIcon, 
-              color: "text-indigo-600", 
-              bg: "bg-indigo-50",
+              gradient: "from-violet-500 to-purple-600",
+              shadow: "shadow-violet-500/25",
               onClick: () => setIsFacultiesModalOpen(true)
             },
             { 
               label: "My Updates", 
               value: myUpdates.length, 
               icon: TrendingUp, 
-              color: "text-emerald-600", 
-              bg: "bg-emerald-50",
+              gradient: "from-emerald-500 to-teal-600",
+              shadow: "shadow-emerald-500/25",
               onClick: () => setIsHistoryModalOpen(true)
             },
             { 
               label: "Last Update", 
               value: lastUpdate, 
               icon: Calendar, 
-              color: "text-orange-600", 
-              bg: "bg-orange-50" 
+              gradient: "from-orange-500 to-rose-500",
+              shadow: "shadow-orange-500/25"
             }
           ].map((stat, i) => (
             <motion.div
@@ -426,15 +426,15 @@ export default function StudentDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               onClick={stat.onClick}
-              className={`bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm transition-all duration-300 ${stat.onClick ? "hover:shadow-xl hover:-translate-y-1 cursor-pointer" : ""}`}
+              className={`bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-slate-100 shadow-sm transition-all duration-300 ${stat.onClick ? "hover:shadow-xl hover:-translate-y-1 cursor-pointer" : ""}`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`${stat.bg} ${stat.color} p-2.5 rounded-2xl`}>
-                  <stat.icon className="w-5 h-5" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className={`bg-gradient-to-br ${stat.gradient} p-2 sm:p-2.5 rounded-xl sm:rounded-2xl shadow-lg ${stat.shadow}`}>
+                  <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">{stat.label}</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-500 uppercase tracking-wide">{stat.label}</h3>
               </div>
-              <div className="text-3xl font-black text-slate-900">{stat.value}</div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">{stat.value}</div>
             </motion.div>
           ))}
         </div>
@@ -443,28 +443,28 @@ export default function StudentDashboard() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex flex-col lg:flex-row justify-between items-center gap-8 relative overflow-hidden"
+          className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-sm flex flex-col lg:flex-row justify-between items-center gap-5 sm:gap-8 relative overflow-hidden"
         >
-          <div className="relative z-10 flex flex-col gap-2 lg:flex-1">
-            <h2 className="text-2xl font-black text-slate-900 flex items-center justify-center lg:justify-start gap-3">
-              <Plus className="text-blue-600" />
+          <div className="relative z-10 flex flex-col gap-1.5 sm:gap-2 lg:flex-1 w-full">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-900 flex items-center justify-center lg:justify-start gap-2 sm:gap-3">
+              <Plus className="text-blue-600 w-5 h-5 sm:w-6 sm:h-6" />
               Daily Progress
             </h2>
-            <p className="text-slate-500 font-medium">Add multiple updates per day to track your detailed progress.</p>
+            <p className="text-slate-500 font-medium text-sm sm:text-base text-center lg:text-left">Add multiple updates per day to track your detailed progress.</p>
           </div>
 
-          <form onSubmit={handleUpdateSubmit} className="relative z-10 flex items-center justify-center lg:justify-end gap-3 w-full lg:flex-[2]">
+          <form onSubmit={handleUpdateSubmit} className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-end gap-2 sm:gap-3 w-full lg:flex-[2]">
             <Input
               type="text"
-              placeholder="What did you achieve? (e.g. Solved 10 DSA, Attended Labs...)"
+              placeholder="Today's progress..."
               value={updateValue}
               onChange={(e) => setUpdateValue(e.target.value)}
-              className="flex-1 h-12 rounded-full bg-slate-50 border-slate-200 text-slate-700 font-semibold px-6 focus:ring-blue-500"
+              className="flex-1 h-11 sm:h-12 rounded-full bg-slate-50 border-slate-200 text-slate-700 font-semibold px-5 sm:px-6 focus:ring-blue-500 text-sm sm:text-base"
             />
             <Button
               type="submit"
               disabled={submitUpdateMutation.isPending}
-              className="h-12 px-8 rounded-full bg-slate-900 hover:bg-blue-600 text-white font-bold shadow-lg shadow-slate-200 transition-all flex gap-2 shrink-0"
+              className="h-11 sm:h-12 px-6 sm:px-8 rounded-full bg-slate-900 hover:bg-blue-600 text-white font-bold shadow-lg shadow-slate-200 transition-all flex gap-2 shrink-0 text-sm sm:text-base justify-center"
             >
               {submitUpdateMutation.isPending ? "Adding..." : "Add Entry"}
             </Button>
@@ -472,16 +472,16 @@ export default function StudentDashboard() {
         </motion.div>
 
         {/* Analytics & History Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8">
+          <div className="lg:col-span-2 bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-sm space-y-4 sm:space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold flex items-center gap-3">
+              <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2 sm:gap-3">
                 <TrendingUp className="text-blue-600" />
                 Performance Trends
               </h3>
             </div>
 
-            <div className="h-[400px] w-full mt-4 relative bg-slate-50/30 rounded-3xl p-4">
+            <div className="h-[260px] sm:h-[400px] w-full mt-3 sm:mt-4 relative bg-slate-50/30 rounded-2xl sm:rounded-3xl p-2 sm:p-4">
               {dashboardChartData.length === 0 ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
                   <TrendingUp className="w-10 h-10 mb-2 opacity-20" />
@@ -543,12 +543,12 @@ export default function StudentDashboard() {
             <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest mt-2">Showing Daily Performance Context (Vertical View)</p>
           </div>
 
-          <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
-            <h3 className="text-xl font-bold flex items-center gap-3">
+          <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border border-slate-100 shadow-sm space-y-4 sm:space-y-6">
+            <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2 sm:gap-3">
               <History className="text-slate-600" />
               Recent Logs
             </h3>
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 sm:space-y-4 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
               {myUpdates.length === 0 ? (
                 <Skeleton count={5} height={60} className="mb-4 rounded-2xl" />
               ) : myUpdates.slice(0, 15).map((u) => (
@@ -592,7 +592,7 @@ export default function StudentDashboard() {
         />
 
         <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
-          <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-hidden flex flex-col p-8 rounded-[40px] border-none shadow-2xl">
+          <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border-none shadow-2xl mx-2">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black flex items-center gap-3">
                 <History className="text-emerald-600" />
@@ -602,17 +602,17 @@ export default function StudentDashboard() {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto space-y-4 mt-6 pr-2 custom-scrollbar">
               {myUpdates.map((u) => (
-                <div key={u._id} className="p-5 bg-slate-50 border border-slate-100 rounded-[24px] flex justify-between items-center group">
-                  <div className="space-y-1">
+                <div key={u._id} className="p-3 sm:p-5 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-[24px] flex justify-between items-start sm:items-center group gap-2">
+                  <div className="space-y-1 min-w-0 flex-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{u.date}</span>
-                    <p className="text-base font-semibold text-slate-800 break-words">{u.value}</p>
+                    <p className="text-sm sm:text-base font-semibold text-slate-800 break-words">{u.value}</p>
                   </div>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(u)} className="h-10 w-10 rounded-xl hover:bg-white hover:text-blue-600">
-                      <Edit className="w-4 h-4" />
+                  <div className="flex gap-1 sm:gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0">
+                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(u)} className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl hover:bg-white hover:text-blue-600">
+                      <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteUpdateMutation.mutate(u._id)} className="h-10 w-10 rounded-xl hover:bg-white hover:text-red-600">
-                      <Trash2 className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" onClick={() => deleteUpdateMutation.mutate(u._id)} className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl hover:bg-white hover:text-red-600">
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </div>
@@ -622,7 +622,7 @@ export default function StudentDashboard() {
         </Dialog>
 
         <Dialog open={!!editingLog} onOpenChange={() => setEditingLog(null)}>
-          <DialogContent className="sm:max-w-[450px] p-8 rounded-[40px] border-none shadow-2xl">
+          <DialogContent className="sm:max-w-[450px] p-4 sm:p-8 rounded-2xl sm:rounded-[40px] border-none shadow-2xl mx-2">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black">Edit Progress Log</DialogTitle>
               <DialogDescription className="font-medium text-slate-500">Correct your activity entry below.</DialogDescription>
@@ -645,10 +645,10 @@ export default function StudentDashboard() {
         </Dialog>
 
         <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
-          <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl rounded-[40px]">
+          <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl rounded-2xl sm:rounded-[40px] mx-2">
              {selectedUser && (
                <div className="flex flex-col bg-white">
-                 <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-10 text-white text-center">
+                 <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6 sm:p-10 text-white text-center">
                     <div className="mx-auto w-24 h-24 mb-4 rounded-[32px] overflow-hidden bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center p-1 shadow-2xl">
                        <div className="w-full h-full rounded-[26px] overflow-hidden bg-white/10 flex items-center justify-center font-black text-2xl">
                           {selectedUser.profilePicture ? (
@@ -660,7 +660,7 @@ export default function StudentDashboard() {
                     <p className="text-blue-300 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">{selectedUser.role?.replace('-', ' ')}</p>
                  </div>
                  
-                 <div className="p-8 space-y-4">
+                 <div className="p-4 sm:p-8 space-y-3 sm:space-y-4">
                     {[
                       { icon: Mail, label: "Email", value: selectedUser.email },
                       { icon: Building2, label: "Department", value: selectedUser.department || "General" },

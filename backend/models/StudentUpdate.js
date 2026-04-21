@@ -23,4 +23,7 @@ const studentUpdateSchema = new mongoose.Schema({
 // Ensure unique entry per student per day per type (removed to allow multiple entries)
 // studentUpdateSchema.index({ student: 1, date: 1, type: 1 }, { unique: true });
 
+// Compound index for admin analytics aggregation
+studentUpdateSchema.index({ student: 1, date: -1 });
+
 export default mongoose.model('StudentUpdate', studentUpdateSchema);
