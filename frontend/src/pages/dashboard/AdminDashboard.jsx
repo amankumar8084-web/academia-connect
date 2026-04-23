@@ -206,7 +206,7 @@ export default function AdminDashboard() {
           Super Admin Dashboard
         </h2>
         <p className="text-sm text-muted-foreground">
-          Welcome to the institutional management portal
+          Welcome to the Project Mayaa
         </p>
       </div>
 
